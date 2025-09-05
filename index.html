@@ -839,18 +839,26 @@
           }
         });
         
-        piece.addEventListener('touchend', function() {
-          if (currentDropTarget) {
+        piece.addEventListener('touchend', function(e) {
+          this.classList.remove('dragging');
+          this.style.position = '';
+          this.style.left = '';
+          this.style.top = '';
+          this.style.zIndex = '';
+          
+          const touch = e.changedTouches[0];
+          const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+          
+          if (dropTarget && dropTarget.classList.contains('puzzle-cell')) {
             const correctPosition = draggedPiece.dataset.correctPosition;
-            const cellIndex = parseInt(currentDropTarget.dataset.index);
+            const cellIndex = parseInt(dropTarget.dataset.index);
             
             if (parseInt(correctPosition) === cellIndex) {
-              // Correct placement
-              currentDropTarget.style.backgroundImage = draggedPiece.style.backgroundImage;
-              currentDropTarget.style.backgroundSize = "300px 300px";
-              currentDropTarget.style.backgroundPosition = draggedPiece.style.backgroundPosition;
-              currentDropTarget.classList.add('correct');
-              currentDropTarget.innerHTML = ''; // Hide the number
+              dropTarget.style.backgroundImage = draggedPiece.style.backgroundImage;
+              dropTarget.style.backgroundSize = "300px 300px";
+              dropTarget.style.backgroundPosition = draggedPiece.style.backgroundPosition;
+              dropTarget.classList.add('correct');
+              dropTarget.innerHTML = '';
               
               draggedPiece.classList.add('placed');
               draggedPiece.style.opacity = '0.3';
@@ -865,18 +873,11 @@
                 }, 500);
               }
             } else {
-              // Wrong placement
-              updateAngryLevel(true); // Increase angry level on failure
+              updateAngryLevel(true);
             }
-            currentDropTarget.style.backgroundColor = "";
+            dropTarget.style.backgroundColor = "";
           }
           
-          // Reset piece position and classes
-          draggedPiece.classList.remove('dragging');
-          draggedPiece.style.position = '';
-          draggedPiece.style.left = '';
-          draggedPiece.style.top = '';
-          draggedPiece.style.zIndex = '';
           draggedPiece = null;
           currentDropTarget = null;
         });
@@ -905,7 +906,6 @@
           const cellIndex = parseInt(this.dataset.index);
           
           if (parseInt(correctPosition) === cellIndex) {
-            // Correct placement
             const draggingPiece = document.querySelector('.puzzle-piece.dragging');
             this.style.backgroundImage = draggingPiece.style.backgroundImage;
             this.style.backgroundSize = "300px 300px";
@@ -920,15 +920,13 @@
             correctPlacements++;
             
             if (correctPlacements === 9) {
-              // Puzzle completed
               setTimeout(() => {
                 updateAngryLevel(false);
                 showResult(true);
               }, 500);
             }
           } else {
-            // Wrong placement
-            updateAngryLevel(true); // Increase angry level on failure
+            updateAngryLevel(true);
           }
         });
       });
@@ -939,7 +937,7 @@
         updateAngryLevel(false);
         showResult(true);
       } else {
-        updateAngryLevel(true); // Increase angry level on failure
+        updateAngryLevel(true);
         showAngry();
       }
     };
