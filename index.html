@@ -122,23 +122,15 @@
     }
 
     .cake {
-      position: relative;
-      margin: 25px auto;
-      width: 120px;
-      height: 110px;
-    }
-
-    .cake-top, .cake-middle, .cake-bottom {
       font-size: 2.5em;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
+      margin: 25px auto;
+      position: relative;
     }
-
-    .cake-top { top: 0; }
-    .cake-middle { top: 35px; }
-    .cake-bottom { top: 70px; }
     
+    .cake-top {
+      position: relative;
+      font-size: 2.5em;
+    }
     .candle {
       position: absolute;
       top: -20px;
@@ -371,8 +363,6 @@
       <h1>💖 Happy Birthday Golu! 💖</h1>
       <div class="cake">
         <div class="cake-top">🎂</div>
-        <div class="cake-middle">🎂</div>
-        <div class="cake-bottom">🎂</div>
         <div class="candle">🕯️</div>
       </div>
       <p>My dearest, every moment with you is special! 🥰<br>Let's celebrate with some fun games! 💕</p>
@@ -667,30 +657,8 @@
 
     // ---------- LEVEL 2: Love's Pursuit ----------
     const photoUploadInput = document.getElementById("myPhotoUpload");
-
-    function startLevel2() {
-      level2.classList.remove("hidden");
-      // Set up file upload listener
-      photoUploadInput.onchange = handleMyPhotoUpload;
-      // Hide game elements until photo is uploaded
-      document.getElementById("gameStats").classList.add("hidden");
-      document.getElementById("lovePursuitGame").classList.add("hidden");
-      startGame2Btn.classList.add("hidden");
-    }
-
-    function handleMyPhotoUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          myPhotoUrl = e.target.result;
-          startGame2Btn.classList.remove("hidden");
-          startGame2Btn.onclick = startGameCanvas;
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
+    
+    // A separate function to handle starting the canvas game
     function startGameCanvas() {
         document.getElementById("photoUploadSection").classList.add("hidden");
         document.getElementById("gameStats").classList.remove("hidden");
@@ -700,21 +668,46 @@
         canvas.width = gameContainer.clientWidth;
         canvas.height = gameContainer.clientHeight;
         
+        // Load all images and then start the game loop
+        let imagesLoaded = 0;
+        const totalImagesToLoad = 1 + otherLadyPhotos.length;
+
+        function checkAllImagesLoaded() {
+            imagesLoaded++;
+            if (imagesLoaded === totalImagesToLoad) {
+                // All images are loaded, start the game
+                gameInterval = setInterval(() => {
+                    gameTime--;
+                    updateStats();
+                }, 1000);
+
+                lastTime = performance.now();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+        
+        myPhoto.onload = checkAllImagesLoaded;
         myPhoto.src = myPhotoUrl;
+        
         otherLadyPhotos = otherLadyUrls.map(url => {
           const img = new Image();
+          img.onload = checkAllImagesLoaded;
           img.src = url;
           return img;
         });
-
+        
         gameScore = 0;
         gameTime = 30;
         images.length = 0;
         
         const scoreDisplay = document.getElementById("gameScore");
         const timeDisplay = document.getElementById("gameTime");
-        scoreDisplay.textContent = gameScore;
-        timeDisplay.textContent = gameTime;
+        
+        // Add a function to update the score and time
+        function updateStats() {
+          scoreDisplay.textContent = gameScore;
+          timeDisplay.textContent = gameTime;
+        }
 
         // Game loop
         function gameLoop(timestamp) {
@@ -793,13 +786,6 @@
         canvas.addEventListener("click", handleInteraction);
         canvas.addEventListener("touchstart", handleInteraction);
 
-        gameInterval = setInterval(() => {
-          gameTime--;
-          updateStats();
-        }, 1000);
-
-        lastTime = performance.now();
-        requestAnimationFrame(gameLoop);
     }
 
     class Photo {
@@ -818,6 +804,30 @@
 
       draw() {
         ctx.drawImage(this.image, this.x, this.y, this.size, this.size);
+      }
+    }
+    
+    function startLevel2() {
+      level2.classList.remove("hidden");
+      // Set up file upload listener
+      photoUploadInput.onchange = handleMyPhotoUpload;
+      // Hide game elements until photo is uploaded
+      document.getElementById("gameStats").classList.add("hidden");
+      document.getElementById("lovePursuitGame").classList.add("hidden");
+      startGame2Btn.classList.add("hidden");
+      // Add the click listener to the start button for Level 2
+      startGame2Btn.onclick = startGameCanvas;
+    }
+
+    function handleMyPhotoUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          myPhotoUrl = e.target.result;
+          startGame2Btn.classList.remove("hidden");
+        };
+        reader.readAsDataURL(file);
       }
     }
     
