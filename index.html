@@ -229,91 +229,34 @@
       transform: scale(1.02);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
     }
-
-    /* Puzzle Board */
-    #puzzleContainer {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 20px 0;
-      width: 100%;
-    }
-
-    #puzzleBoard {
-      width: 95%; /* Make the board more responsive */
-      max-width: 320px;
-      height: auto; /* Let height adjust */
-      aspect-ratio: 1 / 1; /* Maintain aspect ratio */
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 4px;
-      border: 4px solid #ff9a9e;
-      border-radius: 12px;
+    
+    #lovePursuitGame {
+      position: relative;
+      width: 95%;
+      max-width: 450px;
+      height: 60vh;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
       overflow: hidden;
-      background: #ff9a9e;
-      margin-bottom: 20px;
-    }
-
-    .puzzle-cell {
-      width: 100%;
-      height: auto;
-      aspect-ratio: 1 / 1; /* Maintain aspect ratio */
-      background-color: rgba(255, 255, 255, 0.5);
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      color: #d1477a;
-      /* Add touch-action to prevent default browser gestures */
+      margin: 20px auto;
+      border: 4px solid #d1477a;
       touch-action: none;
     }
 
-    .puzzle-cell.correct {
-      background-color: rgba(144, 238, 144, 0.3);
-    }
-
-    #puzzlePieces {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 4px;
-      width: 95%; /* Make the pieces container more responsive */
-      max-width: 320px;
-      margin-top: 20px;
-    }
-
-    .puzzle-piece {
+    #gameCanvas {
       width: 100%;
-      height: auto;
-      aspect-ratio: 1 / 1; /* Maintain aspect ratio */
-      background-size: 300px 300px;
-      cursor: grab;
-      transition: transform 0.2s;
-      border-radius: 5px;
-      border: 2px solid #ff9a9e;
-      /* Add touch-action to prevent default browser gestures */
-      touch-action: none;
+      height: 100%;
     }
 
-    .puzzle-piece.dragging {
-      opacity: 0.7;
-      transform: scale(0.95);
-    }
-
-    .puzzle-piece.placed {
-      opacity: 0.5;
-      cursor: default;
-    }
-
-    .image-upload {
-      margin: 20px 0;
-      color: #7c4d4d;
-    }
-
-    .image-upload label {
-      display: block;
-      margin-bottom: 10px;
-      font-weight: bold;
+    #gameStats {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        margin-top: 10px;
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #d1477a;
     }
 
     /* Emoji Quiz */
@@ -458,8 +401,8 @@
         <p>Arrange our beautiful memories in order!</p>
       </div>
       <div class="gameCard" id="game2">
-        <h3>Image Puzzle 🧩</h3>
-        <p>Rearrange tiles to reveal our special photo!</p>
+        <h3>Love's Pursuit 💖</h3>
+        <p>Find my face among the crowd! Choose wisely... 😉</p>
       </div>
       <div class="gameCard" id="game3">
         <h3>Emoji Puzzles ❤️</h3>
@@ -476,24 +419,28 @@
     <button id="checkOrder">Check Our Love ✅</button>
   </div>
 
-  <!-- Level 2: Image Puzzle -->
+  <!-- Level 2: Love's Pursuit -->
   <div id="level2" class="screen hidden">
-    <h2>Level 2: Puzzle Time 🧩</h2>
-    <p>Drag and drop the puzzle pieces into the grid to reveal our special memory together 💖</p>
-    
-    <div class="image-upload">
-      <label>Choose our special photo:</label>
-      <div class="file-upload">
-        <label class="file-upload-label">Select Image 📷</label>
-        <input type="file" id="puzzleImageUpload" accept="image/*">
+    <h2>Level 2: Love's Pursuit 💖</h2>
+    <p>Tap on my face! Don't tap on anyone else! 😉</p>
+    <div id="photoUploadSection">
+      <div class="image-upload">
+        <label>First, choose your photo:</label>
+        <div class="file-upload">
+          <label class="file-upload-label">Select My Photo 📷</label>
+          <input type="file" id="myPhotoUpload" accept="image/*">
+        </div>
       </div>
+      <button id="startGame2Btn" class="hidden">Start Game</button>
     </div>
-    
-    <div id="puzzleContainer">
-      <div id="puzzleBoard"></div>
-      <div id="puzzlePieces"></div>
+
+    <div id="gameStats" class="hidden">
+      <span>Score: <span id="gameScore">0</span></span>
+      <span>Time: <span id="gameTime">30</span>s</span>
     </div>
-    <button id="checkPuzzle">Check ✅</button>
+    <div id="lovePursuitGame" class="hidden">
+      <canvas id="gameCanvas"></canvas>
+    </div>
   </div>
 
   <!-- Level 3: Emoji Puzzles -->
@@ -513,9 +460,6 @@
   <script>
     // ---------- Global Variables ----------
     let angryCount = 0;
-    let selectedImage = null;
-    let puzzlePieces = [];
-    let correctPlacements = 0;
     let currentDragTarget = null; // For touch events
 
     // ---------- Screens ----------
@@ -527,6 +471,26 @@
     const result = document.getElementById("result");
     const angryLevelElement = document.getElementById("angryCount");
     const angryIcon = document.getElementById("angryIcon");
+    const startGame2Btn = document.getElementById("startGame2Btn");
+
+    // ---------- Game Variables (for Love's Pursuit) ----------
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    let myPhotoUrl = null; 
+    const otherLadyUrls = [
+      'https://i.pinimg.com/originals/06/d8/e2/06d8e2c7a74035702a08006ae2adf876.jpg',
+      'https://i.pinimg.com/736x/27/b5/10/27b5104e0fbd230a6e90e16b1edf660e.jpg',
+      'https://preview.redd.it/koobpw1fdkt91.png?width=600&format=png&auto=webp&s=12df1368bc5468725fc324f965ac73aa61211688',
+      'https://i1.sndcdn.com/artworks-lpXRGXnYghR3HzU4-Jye7hA-t1080x1080.jpg'
+    ]; 
+    const images = [];
+    let gameScore = 0;
+    let gameTime = 30;
+    let lastTime = 0;
+    let spawnTimer = 0;
+    let gameInterval;
+    let myPhoto = new Image();
+    let otherLadyPhotos = [];
 
     // ---------- Start Game ----------
     document.getElementById("startBtn").addEventListener("click", () => {
@@ -701,247 +665,162 @@
       });
     }
 
-    // ---------- LEVEL 2: Image Puzzle ----------
-    function startLevel2(){
+    // ---------- LEVEL 2: Love's Pursuit ----------
+    const photoUploadInput = document.getElementById("myPhotoUpload");
+
+    function startLevel2() {
       level2.classList.remove("hidden");
-      const board = document.getElementById("puzzleBoard");
-      const piecesContainer = document.getElementById("puzzlePieces");
-      board.innerHTML = "";
-      piecesContainer.innerHTML = "";
-      
-      // Set up image upload
-      const imageUpload = document.getElementById("puzzleImageUpload");
-      imageUpload.onchange = handleImageUpload;
-      
-      // Create empty puzzle grid
-      for (let i = 0; i < 9; i++) {
-        const cell = document.createElement("div");
-        cell.className = "puzzle-cell";
-        cell.dataset.index = i;
-        cell.innerHTML = i + 1;
-        board.appendChild(cell);
-      }
-      
-      // Use default image initially
-      selectedImage = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80';
-      generatePuzzle();
+      // Set up file upload listener
+      photoUploadInput.onchange = handleMyPhotoUpload;
+      // Hide game elements until photo is uploaded
+      document.getElementById("gameStats").classList.add("hidden");
+      document.getElementById("lovePursuitGame").classList.add("hidden");
+      startGame2Btn.classList.add("hidden");
     }
 
-    function handleImageUpload(event) {
+    function handleMyPhotoUpload(event) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          selectedImage = e.target.result;
-          generatePuzzle();
+          myPhotoUrl = e.target.result;
+          startGame2Btn.classList.remove("hidden");
+          startGame2Btn.onclick = startGameCanvas;
         };
         reader.readAsDataURL(file);
       }
     }
 
-    function generatePuzzle() {
-      const piecesContainer = document.getElementById("puzzlePieces");
-      const board = document.getElementById("puzzleBoard");
-      piecesContainer.innerHTML = "";
-      // Reset the board to empty cells with numbers
-      board.querySelectorAll('.puzzle-cell').forEach((cell, i) => {
-        cell.style.backgroundImage = 'none';
-        cell.style.backgroundPosition = '';
-        cell.classList.remove('correct');
-        cell.innerHTML = i + 1;
-      });
-      puzzlePieces = [];
-      correctPlacements = 0;
-      
-      // Create puzzle pieces
-      for (let i = 0; i < 9; i++) {
-        const piece = document.createElement("div");
-        piece.className = "puzzle-piece";
-        piece.style.backgroundImage = `url('${selectedImage}')`;
-        piece.style.backgroundSize = "300px 300px";
-        piece.style.backgroundPosition = `${-(i % 3) * 100}px ${-Math.floor(i / 3) * 100}px`;
-        piece.dataset.correctPosition = i;
-        piece.draggable = true;
+    function startGameCanvas() {
+        document.getElementById("photoUploadSection").classList.add("hidden");
+        document.getElementById("gameStats").classList.remove("hidden");
+        document.getElementById("lovePursuitGame").classList.remove("hidden");
         
-        puzzlePieces.push(piece);
-        piecesContainer.appendChild(piece);
-      }
-      
-      // Shuffle puzzle pieces
-      shufflePuzzlePieces();
-      initPuzzleDragAndDrop();
-    }
+        const gameContainer = document.getElementById("lovePursuitGame");
+        canvas.width = gameContainer.clientWidth;
+        canvas.height = gameContainer.clientHeight;
+        
+        myPhoto.src = myPhotoUrl;
+        otherLadyPhotos = otherLadyUrls.map(url => {
+          const img = new Image();
+          img.src = url;
+          return img;
+        });
 
-    function shufflePuzzlePieces() {
-      const piecesContainer = document.getElementById("puzzlePieces");
-      const pieces = Array.from(piecesContainer.children);
-      pieces.sort(() => Math.random() - 0.5);
-      pieces.forEach(piece => piecesContainer.appendChild(piece));
-    }
+        gameScore = 0;
+        gameTime = 30;
+        images.length = 0;
+        
+        const scoreDisplay = document.getElementById("gameScore");
+        const timeDisplay = document.getElementById("gameTime");
+        scoreDisplay.textContent = gameScore;
+        timeDisplay.textContent = gameTime;
 
-    function initPuzzleDragAndDrop() {
-      const cells = document.querySelectorAll('.puzzle-cell');
-      const pieces = document.querySelectorAll('.puzzle-piece');
-      
-      let draggedPiece = null;
-      let currentDropTarget = null;
-      let touchOffsetX = 0;
-      let touchOffsetY = 0;
-
-      pieces.forEach(piece => {
-        // Mouse events
-        piece.addEventListener('dragstart', function(e) {
-          e.dataTransfer.setData('text/plain', this.dataset.correctPosition);
-          this.classList.add('dragging');
-          draggedPiece = this;
-        });
-        
-        piece.addEventListener('dragend', function() {
-          this.classList.remove('dragging');
-          draggedPiece = null;
-        });
-        
-        // Touch events
-        piece.addEventListener('touchstart', function(e) {
-          e.preventDefault();
-          const touch = e.touches[0];
-          draggedPiece = this;
-          this.classList.add('dragging');
-          // Calculate offset for accurate positioning
-          const rect = this.getBoundingClientRect();
-          touchOffsetX = touch.clientX - rect.left;
-          touchOffsetY = touch.clientY - rect.top;
-          
-          this.style.position = 'fixed';
-          this.style.zIndex = '1000';
-          this.style.left = `${touch.clientX - touchOffsetX}px`;
-          this.style.top = `${touch.clientY - touchOffsetY}px`;
-        });
-        
-        piece.addEventListener('touchmove', function(e) {
-          e.preventDefault();
-          const touch = e.touches[0];
-          this.style.left = `${touch.clientX - touchOffsetX}px`;
-          this.style.top = `${touch.clientY - touchOffsetY}px`;
-          
-          const target = document.elementFromPoint(touch.clientX, touch.clientY);
-          if (target && target.classList.contains('puzzle-cell')) {
-            if (currentDropTarget && currentDropTarget !== target) {
-              currentDropTarget.style.backgroundColor = "";
-            }
-            currentDropTarget = target;
-            currentDropTarget.style.backgroundColor = "#ffd6e0";
-          } else {
-            if (currentDropTarget) {
-              currentDropTarget.style.backgroundColor = "";
-              currentDropTarget = null;
-            }
-          }
-        });
-        
-        piece.addEventListener('touchend', function(e) {
-          this.classList.remove('dragging');
-          this.style.position = '';
-          this.style.left = '';
-          this.style.top = '';
-          this.style.zIndex = '';
-          
-          const touch = e.changedTouches[0];
-          const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
-          
-          if (dropTarget && dropTarget.classList.contains('puzzle-cell')) {
-            const correctPosition = draggedPiece.dataset.correctPosition;
-            const cellIndex = parseInt(dropTarget.dataset.index);
-            
-            if (parseInt(correctPosition) === cellIndex) {
-              dropTarget.style.backgroundImage = draggedPiece.style.backgroundImage;
-              dropTarget.style.backgroundSize = "300px 300px";
-              dropTarget.style.backgroundPosition = draggedPiece.style.backgroundPosition;
-              dropTarget.classList.add('correct');
-              dropTarget.innerHTML = '';
-              
-              draggedPiece.classList.add('placed');
-              draggedPiece.style.opacity = '0.3';
-              draggedPiece.style.cursor = 'default';
-              
-              correctPlacements++;
-              
-              if (correctPlacements === 9) {
-                setTimeout(() => {
-                  updateAngryLevel(false);
-                  showResult(true);
-                }, 500);
-              }
+        // Game loop
+        function gameLoop(timestamp) {
+          if (gameTime <= 0) {
+            // Time's up! Check if they won.
+            if (gameScore >= 10) { // Winning score
+              updateAngryLevel(false);
+              showResult(true);
             } else {
               updateAngryLevel(true);
+              showAngry();
             }
-            dropTarget.style.backgroundColor = "";
+            return;
           }
-          
-          draggedPiece = null;
-          currentDropTarget = null;
-        });
-      });
-      
-      cells.forEach(cell => {
-        // Mouse events
-        cell.addEventListener('dragover', function(e) {
-          e.preventDefault();
-        });
-        
-        cell.addEventListener('dragenter', function(e) {
-          e.preventDefault();
-          this.style.backgroundColor = "#ffd6e0";
-        });
-        
-        cell.addEventListener('dragleave', function() {
-          this.style.backgroundColor = "";
-        });
-        
-        cell.addEventListener('drop', function(e) {
-          e.preventDefault();
-          this.style.backgroundColor = "";
-          
-          const correctPosition = e.dataTransfer.getData('text/plain');
-          const cellIndex = parseInt(this.dataset.index);
-          
-          if (parseInt(correctPosition) === cellIndex) {
-            const draggingPiece = document.querySelector('.puzzle-piece.dragging');
-            this.style.backgroundImage = draggingPiece.style.backgroundImage;
-            this.style.backgroundSize = "300px 300px";
-            this.style.backgroundPosition = draggingPiece.style.backgroundPosition;
-            this.classList.add('correct');
-            this.innerHTML = '';
-            
-            draggingPiece.classList.add('placed');
-            draggingPiece.style.opacity = '0.3';
-            draggingPiece.style.cursor = 'default';
-            
-            correctPlacements++;
-            
-            if (correctPlacements === 9) {
-              setTimeout(() => {
-                updateAngryLevel(false);
-                showResult(true);
-              }, 500);
+
+          const elapsed = timestamp - lastTime;
+          lastTime = timestamp;
+
+          spawnTimer += elapsed;
+          if (spawnTimer > 1000) { // Spawn a new image every second
+            spawnImage();
+            spawnTimer = 0;
+          }
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          for (let i = images.length - 1; i >= 0; i--) {
+            const image = images[i];
+            image.update();
+            image.draw();
+
+            // Remove image if it goes off screen
+            if (image.y < -image.size) {
+              images.splice(i, 1);
             }
-          } else {
-            updateAngryLevel(true);
           }
-        });
-      });
+          requestAnimationFrame(gameLoop);
+        }
+        
+        // Spawn a new image
+        function spawnImage() {
+          const isCorrect = Math.random() < 0.7; // 70% chance to be your photo
+          const imageType = isCorrect ? myPhoto : otherLadyPhotos[Math.floor(Math.random() * otherLadyPhotos.length)];
+          const x = Math.random() * (canvas.width - 50);
+          const y = canvas.height + 20;
+          images.push(new Photo(x, y, imageType, isCorrect));
+        }
+
+        // Handle clicks/taps
+        function handleInteraction(e) {
+          const rect = canvas.getBoundingClientRect();
+          const clientX = e.clientX || e.touches[0].clientX;
+          const clientY = e.clientY || e.touches[0].clientY;
+          const x = clientX - rect.left;
+          const y = clientY - rect.top;
+
+          for (let i = images.length - 1; i >= 0; i--) {
+            const image = images[i];
+            if (x > image.x && x < image.x + image.size && y > image.y && y < image.y + image.size) {
+              if (image.isCorrect) {
+                gameScore++;
+                images.splice(i, 1);
+                updateStats();
+              } else {
+                // Game over!
+                updateAngryLevel(true);
+                showAngry();
+                images.length = 0; // Clear images
+                clearInterval(gameInterval);
+                return;
+              }
+            }
+          }
+        }
+
+        canvas.addEventListener("click", handleInteraction);
+        canvas.addEventListener("touchstart", handleInteraction);
+
+        gameInterval = setInterval(() => {
+          gameTime--;
+          updateStats();
+        }, 1000);
+
+        lastTime = performance.now();
+        requestAnimationFrame(gameLoop);
     }
 
-    document.getElementById("checkPuzzle").onclick = () => {
-      if (correctPlacements === 9) {
-        updateAngryLevel(false);
-        showResult(true);
-      } else {
-        updateAngryLevel(true);
-        showAngry();
+    class Photo {
+      constructor(x, y, image, isCorrect) {
+        this.x = x;
+        this.y = y;
+        this.size = 50;
+        this.image = image;
+        this.isCorrect = isCorrect;
+        this.speed = Math.random() * 0.5 + 0.5;
       }
-    };
 
+      update() {
+        this.y -= this.speed;
+      }
+
+      draw() {
+        ctx.drawImage(this.image, this.x, this.y, this.size, this.size);
+      }
+    }
+    
     // ---------- LEVEL 3: Emoji Puzzles ----------
     function startLevel3(){
       level3.classList.remove("hidden");
@@ -1014,6 +893,7 @@
       level1.classList.add("hidden"); 
       level2.classList.add("hidden"); 
       level3.classList.add("hidden");
+      clearInterval(gameInterval); // Stop game timer
     }
 
     function showResult(win){
@@ -1033,12 +913,20 @@
       level1.classList.add("hidden"); 
       level2.classList.add("hidden"); 
       level3.classList.add("hidden");
+      clearInterval(gameInterval); // Stop game timer
     }
 
     // New function to reset the game state without reloading the page
     function resetGameAndPlayAgain() {
         result.classList.add("hidden");
         gameSelect.classList.remove("hidden");
+        // Reset the game variables
+        myPhotoUrl = null;
+        gameScore = 0;
+        gameTime = 30;
+        images.length = 0;
+        lastTime = 0;
+        spawnTimer = 0;
     }
 
     // Initialize floating hearts
