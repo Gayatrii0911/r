@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday Golu! 💖</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #ffd6e7, #ffc2d6, #ffafcc, #ff9ebb);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: #5a2b2b;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .screen {
+      text-align: center;
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+      overflow-y: auto;
+      max-height: 100vh;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      margin: 20px;
+    }
+
+    .hidden { 
+      display: none; 
+    }
+
+    h1, h2 { 
+      color: #d1477a; 
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+    }
+
+    p { 
+      color: #7c4d4d; 
+      font-size: 1.1em; 
+      margin: 10px 0 20px 0; 
+      line-height: 1.5;
+    }
+
+    button {
+      background: linear-gradient(to right, #ff6b6b, #ff8e8e);
+      color: white;
+      border: none;
+      padding: 14px 25px;
+      font-size: 1.1em;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+      margin: 10px;
+    }
+
+    button:hover { 
+      transform: translateY(-3px);
+      box-shadow: 0 7px 20px rgba(255, 107, 107, 0.6);
+    }
+
+    /* Angry Bird Level Indicator */
+    #angryLevel {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 12px 18px;
+      border-radius: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      font-weight: bold;
+    }
+
+    #angryIcon {
+      font-size: 1.8em;
+      transition: transform 0.3s;
+    }
+
+    .angry-shake {
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+
+    /* Welcome Screen Enhancements */
+    .birthday-card {
+      padding: 30px 20px;
+    }
+
+    .cake {
+      position: relative;
+      margin: 25px auto;
+      width: 120px;
+      height: 110px;
+    }
+
+    .cake-top, .cake-middle, .cake-bottom {
+      font-size: 2.5em;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .cake-top { top: 0; }
+    .cake-middle { top: 35px; }
+    .cake-bottom { top: 70px; }
+    
+    .candle {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.8em;
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+     100% { transform: scale(1); }
+    }
+
+    .floating-hearts {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      font-size: 1.8em;
+    }
+
+    .floating-hearts span {
+      position: absolute;
+      animation: float 6s ease-in-out infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+      50% { transform: translateY(-30px) rotate(20deg); opacity: 1; }
+      100% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+    }
+
+    /* Game Selection Cards */
+    .games { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 20px; 
+      margin: 20px 0;
+    }
+    
+    .gameCard {
+      background: linear-gradient(to right, rgba(255, 182, 193, 0.7), rgba(255, 215, 0, 0.7));
+      color: #7c4d4d;
+      padding: 20px;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .gameCard:hover { 
+      transform: translateY(-5px) scale(1.02); 
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Draggable List */
+    .draggable-list { 
+      list-style: none; 
+      padding: 0; 
+      margin: 25px 0; 
+      max-height: 60vh; 
+      overflow-y: auto; 
+    }
+    
+    .draggable-list li {
+      background: rgba(255, 228, 225, 0.9);
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 12px;
+      cursor: grab;
+      font-size: 1.1em;
+      transition: all 0.2s;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    }
+    
+    .draggable-list li:active {
+      cursor: grabbing;
+      transform: scale(1.02);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Puzzle Board */
+    #puzzleContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    #puzzleBoard {
+      width: 320px;
+      height: 320px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      border: 4px solid #ff9a9e;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ff9a9e;
+      margin-bottom: 20px;
+    }
+
+    .puzzle-cell {
+      width: 100%;
+      height: 104px;
+      background-color: rgba(255, 255, 255, 0.5);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #d1477a;
+    }
+
+    .puzzle-cell.correct {
+      background-color: rgba(144, 238, 144, 0.3);
+    }
+
+    #puzzlePieces {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      width: 320px;
+      margin-top: 20px;
+    }
+
+    .puzzle-piece {
+      width: 100px;
+      height: 100px;
+      background-size: 300px 300px;
+      cursor: grab;
+      transition: transform 0.2s;
+      border-radius: 5px;
+      border: 2px solid #ff9a9e;
+    }
+
+    .puzzle-piece.dragging {
+      opacity: 0.7;
+      transform: scale(0.95);
+    }
+
+    .puzzle-piece.placed {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .image-upload {
+      margin: 20px 0;
+      color: #7c4d4d;
+    }
+
+    .image-upload label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    /* Emoji Quiz */
+    .quiz-item {
+      background: rgba(255, 228, 225, 0.9);
+      padding: 20px;
+      border-radius: 15px;
+      margin: 15px 0;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .quiz-item input {
+      width: 80%;
+      padding: 12px 15px;
+      border: 2px solid #ff9a9e;
+      border-radius: 50px;
+      font-size: 1em;
+      margin-top: 10px;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .quiz-item input:focus {
+      border-color: #ff6b6b;
+      box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.3);
+    }
+
+    /* Confetti */
+    .confetti { 
+      position: absolute; 
+      width: 100%; 
+      height: 100%; 
+      top: 0;
+      left: 0;
+      pointer-events: none; 
+      z-index: -1;
+    }
+
+    .confetti span {
+      position: absolute;
+      animation: fall 5s linear infinite;
+      opacity: 0.8;
+      font-size: 1.5em;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(-10%) rotate(0deg); opacity: 1;}
+      100% { transform: translateY(110%) rotate(360deg); opacity: 0;}
+    }
+
+    /* Result Screen */
+    #result {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    #resultMsg {
+      color: #d1477a;
+      margin-bottom: 25px;
+      white-space: pre-line;
+      line-height: 1.6;
+      font-size: 1.3em;
+    }
+
+    /* File upload styling */
+    .file-upload {
+      position: relative;
+      display: inline-block;
+      margin: 15px 0;
+    }
+
+    .file-upload input[type="file"] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .file-upload-label {
+      display: inline-block;
+      padding: 12px 20px;
+      background: linear-gradient(to right, #ff6b6b, #ff8e8e);
+      color: white;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    }
+
+    .file-upload-label:hover {
+      background: linear-gradient(to right, #ff8e8e, #ff6b6b);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <!-- Angry Bird Level Indicator -->
+  <div id="angryLevel">
+    <span>Angry Level: </span>
+    <span id="angryCount">0</span>
+    <div id="angryIcon">😡</div>
+  </div>
+
+  <!-- Welcome Screen -->
+  <div id="welcome" class="screen">
+    <div class="birthday-card">
+      <h1>💖 Happy Birthday Golu! 💖</h1>
+      <div class="cake">
+        <div class="cake-top">🎂</div>
+        <div class="cake-middle">🎂</div>
+        <div class="cake-bottom">🎂</div>
+        <div class="candle">🕯️</div>
+      </div>
+      <p>My dearest, every moment with you is special! 🥰<br>Let's celebrate with some fun games! 💕</p>
+      <button id="startBtn" class="pulse">Begin Our Adventure 🚀</button>
+    </div>
+    <div class="confetti">
+      <span style="left: 10%; animation-delay: 0s;">🎉</span>
+      <span style="left: 30%; animation-delay: 1s;">🎈</span>
+      <span style="left: 50%; animation-delay: 2s;">✨</span>
+      <span style="left: 70%; animation-delay: 1.5s;">💖</span>
+      <span style="left: 90%; animation-delay: 0.5s;">🎊</span>
+    </div>
+    <div class="floating-hearts">
+      <span style="left: 20%; animation-delay: 0s;">💖</span>
+      <span style="left: 50%; animation-delay: 2s;">💕</span>
+      <span style="left: 80%; animation-delay: 4s;">💗</span>
+    </div>
+  </div>
+
+  <!-- Game Selection -->
+  <div id="gameSelect" class="screen hidden">
+    <h2>Choose a Game 🎮</h2>
+    <div class="games">
+      <div class="gameCard" id="game1">
+        <h3>Memory Drag 📸</h3>
+        <p>Arrange our beautiful memories in order!</p>
+      </div>
+      <div class="gameCard" id="game2">
+        <h3>Image Puzzle 🧩</h3>
+        <p>Rearrange tiles to reveal our special photo!</p>
+      </div>
+      <div class="gameCard" id="game3">
+        <h3>Emoji Puzzles ❤️</h3>
+        <p>Guess our special moments from emojis!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 1: Memory Drag -->
+  <div id="level1" class="screen hidden">
+    <h2>Level 1: Arrange Our Memories 📸</h2>
+    <p>Drag the cards into the correct order of our beautiful journey together 🥰</p>
+    <ul id="memoryList" class="draggable-list"></ul>
+    <button id="checkOrder">Check Our Love ✅</button>
+  </div>
+
+  <!-- Level 2: Image Puzzle -->
+  <div id="level2" class="screen hidden">
+    <h2>Level 2: Puzzle Time 🧩</h2>
+    <p>Drag and drop the puzzle pieces into the grid to reveal our special memory together 💖</p>
+    
+    <div class="image-upload">
+      <label>Choose our special photo:</label>
+      <div class="file-upload">
+        <label class="file-upload-label">Select Image 📷</label>
+        <input type="file" id="puzzleImageUpload" accept="image/*">
+      </div>
+    </div>
+    
+    <div id="puzzleContainer">
+      <div id="puzzleBoard"></div>
+      <div id="puzzlePieces"></div>
+    </div>
+    <button id="checkPuzzle">Check ✅</button>
+  </div>
+
+  <!-- Level 3: Emoji Puzzles -->
+  <div id="level3" class="screen hidden">
+    <h2>Level 3: Emoji Puzzles ❤️</h2>
+    <p>Guess our special moments from these emoji clues! 💑</p>
+    <div id="quizContainer"></div>
+    <button id="finishGame">Finish 🎉</button>
+  </div>
+
+  <!-- Result -->
+  <div id="result" class="screen hidden">
+    <h1 id="resultMsg"></h1>
+    <button onclick="location.reload()">Play Again 🔁</button>
+  </div>
+
+  <script>
+    // ---------- Global Variables ----------
+    let angryCount = 0;
+    let selectedImage = null;
+    let puzzlePieces = [];
+    let correctPlacements = 0;
+
+    // ---------- Screens ----------
+    const welcome = document.getElementById("welcome");
+    const gameSelect = document.getElementById("gameSelect");
+    const level1 = document.getElementById("level1");
+    const level2 = document.getElementById("level2");
+    const level3 = document.getElementById("level3");
+    const result = document.getElementById("result");
+    const angryLevelElement = document.getElementById("angryCount");
+    const angryIcon = document.getElementById("angryIcon");
+
+    // ---------- Start Game ----------
+    document.getElementById("startBtn").addEventListener("click", () => {
+      welcome.classList.add("hidden");
+      gameSelect.classList.remove("hidden");
+    });
+
+    // ---------- Game Selection ----------
+    document.getElementById("game1").onclick = () => {
+      gameSelect.classList.add("hidden");
+      startLevel1();
+    }
+    document.getElementById("game2").onclick = () => {
+      gameSelect.classList.add("hidden");
+      startLevel2();
+    }
+    document.getElementById("game3").onclick = () => {
+      gameSelect.classList.add("hidden");
+      startLevel3();
+    }
+
+    // ---------- Angry Bird Functions ----------
+    function updateAngryLevel(increase = true) {
+      if (increase) {
+        angryCount++;
+      } else {
+        angryCount = Math.max(0, angryCount - 1);
+      }
+      
+      angryLevelElement.textContent = angryCount;
+      
+      // Add animation to the angry icon
+      angryIcon.classList.add('angry-shake');
+      setTimeout(() => {
+        angryIcon.classList.remove('angry-shake');
+      }, 500);
+      
+      // Change icon based on anger level
+      if (angryCount >= 5) {
+        angryIcon.textContent = '😠';
+      } else if (angryCount >= 10) {
+        angryIcon.textContent = '😡';
+      } else if (angryCount >= 15) {
+        angryIcon.textContent = '🤬';
+      } else {
+        angryIcon.textContent = '😡';
+      }
+    }
+
+    // ---------- LEVEL 1: Memory Drag ----------
+    const memories = [
+      "Proposal 💍",
+      "First Date 🍽️",
+      "Bandstand (Bandra) 🌊", 
+      "His Birthday 🎂",
+      "Girgaon Chowpatty Kiss 💋",
+      "Haji Ali & Mahalaxmi 🕌",
+      "Central Park Walk 🚶‍♀️",
+      "Matheran (1st Time) 🏞️",
+      "Borivali National Park 🐅",
+      "Dadar Chowpatty 🏖️",
+      "ISKCON & Zoo 🐘",
+      "Wonders Park 🎡",
+      "Matheran (2nd Time) 🐎",
+      "Snow World ❄️",
+      "Bike Ride 🏍️",
+      "Nature Trail 🌿"
+    ];
+
+    function startLevel1(){
+      level1.classList.remove("hidden");
+      const list = document.getElementById("memoryList");
+      list.innerHTML = "";
+      let shuffled = [...memories].sort(() => Math.random() - 0.5);
+      
+      shuffled.forEach(mem => {
+        const li = document.createElement("li");
+        li.textContent = mem;
+        li.draggable = true;
+        list.appendChild(li);
+      });
+      
+      initDragAndDrop(list);
+
+      document.getElementById("checkOrder").onclick = () => {
+        const items = [...list.querySelectorAll("li")].map(li => li.textContent);
+        if (items.join() === memories.join()) {
+          updateAngryLevel(false);
+          showResult(true);
+        } else {
+          updateAngryLevel();
+          showAngry();
+        }
+      }
+    }
+
+    function initDragAndDrop(container) {
+      let draggedItem = null;
+
+      container.querySelectorAll('li').forEach(item => {
+        item.addEventListener('dragstart', function() {
+          draggedItem = this;
+          setTimeout(() => this.style.opacity = '0.5', 0);
+        });
+
+        item.addEventListener('dragend', function() {
+          draggedItem = null;
+          this.style.opacity = '1';
+        });
+
+        item.addEventListener('dragover', function(e) {
+          e.preventDefault();
+        });
+
+        item.addEventListener('dragenter', function(e) {
+          e.preventDefault();
+          this.style.backgroundColor = '#ffd1dc';
+        });
+
+        item.addEventListener('dragleave', function() {
+          this.style.backgroundColor = '#ffe4e1';
+        });
+
+        item.addEventListener('drop', function(e) {
+          e.preventDefault();
+          this.style.backgroundColor = '#ffe4e1';
+          if (this !== draggedItem) {
+            container.insertBefore(draggedItem, this.nextSibling);
+          }
+        });
+      });
+    }
+
+    // ---------- LEVEL 2: Image Puzzle ----------
+    function startLevel2(){
+      level2.classList.remove("hidden");
+      const board = document.getElementById("puzzleBoard");
+      const piecesContainer = document.getElementById("puzzlePieces");
+      board.innerHTML = "";
+      piecesContainer.innerHTML = "";
+      
+      // Set up image upload
+      const imageUpload = document.getElementById("puzzleImageUpload");
+      imageUpload.onchange = handleImageUpload;
+      
+      // Create empty puzzle grid
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement("div");
+        cell.className = "puzzle-cell";
+        cell.dataset.index = i;
+        cell.innerHTML = i + 1;
+        board.appendChild(cell);
+      }
+      
+      // Use default image initially
+      selectedImage = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80';
+      generatePuzzle();
+    }
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          selectedImage = e.target.result;
+          generatePuzzle();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function generatePuzzle() {
+      const piecesContainer = document.getElementById("puzzlePieces");
+      piecesContainer.innerHTML = "";
+      puzzlePieces = [];
+      correctPlacements = 0;
+      
+      // Create puzzle pieces
+      for (let i = 0; i < 9; i++) {
+        const piece = document.createElement("div");
+        piece.className = "puzzle-piece";
+        piece.style.backgroundImage = `url('${selectedImage}')`;
+        piece.style.backgroundSize = "300px 300px";
+        piece.style.backgroundPosition = `${-(i % 3) * 100}px ${-Math.floor(i / 3) * 100}px`;
+        piece.dataset.correctPosition = i;
+        piece.draggable = true;
+        
+        puzzlePieces.push(piece);
+        piecesContainer.appendChild(piece);
+      }
+      
+      // Shuffle puzzle pieces
+      shufflePuzzlePieces();
+      initPuzzleDragAndDrop();
+    }
+
+    function shufflePuzzlePieces() {
+      const piecesContainer = document.getElementById("puzzlePieces");
+      for (let i = piecesContainer.children.length; i >= 0; i--) {
+        piecesContainer.appendChild(piecesContainer.children[Math.random() * i | 0]);
+      }
+    }
+
+    function initPuzzleDragAndDrop() {
+      const cells = document.querySelectorAll('.puzzle-cell');
+      const pieces = document.querySelectorAll('.puzzle-piece');
+      
+      pieces.forEach(piece => {
+        piece.addEventListener('dragstart', function(e) {
+          e.dataTransfer.setData('text/plain', this.dataset.correctPosition);
+          this.classList.add('dragging');
+        });
+        
+        piece.addEventListener('dragend', function() {
+          this.classList.remove('dragging');
+        });
+      });
+      
+      cells.forEach(cell => {
+        cell.addEventListener('dragover', function(e) {
+          e.preventDefault();
+        });
+        
+        cell.addEventListener('dragenter', function(e) {
+          e.preventDefault();
+          this.style.backgroundColor = "#ffd6e0";
+        });
+        
+        cell.addEventListener('dragleave', function() {
+          this.style.backgroundColor = "";
+        });
+        
+        cell.addEventListener('drop', function(e) {
+          e.preventDefault();
+          this.style.backgroundColor = "";
+          
+          const correctPosition = e.dataTransfer.getData('text/plain');
+          const cellIndex = parseInt(this.dataset.index);
+          
+          if (parseInt(correctPosition) === cellIndex) {
+            // Correct placement
+            const draggingPiece = document.querySelector('.puzzle-piece.dragging');
+            this.style.backgroundImage = draggingPiece.style.backgroundImage;
+            this.style.backgroundSize = "300px 300px";
+            this.style.backgroundPosition = draggingPiece.style.backgroundPosition;
+            this.classList.add('correct');
+            
+            draggingPiece.classList.add('placed');
+            draggingPiece.style.opacity = '0.3';
+            draggingPiece.style.cursor = 'default';
+            
+            correctPlacements++;
+            
+            if (correctPlacements === 9) {
+              // Puzzle completed
+              setTimeout(() => {
+                updateAngryLevel(false);
+                showResult(true);
+              }, 500);
+            }
+          } else {
+            // Wrong placement
+            updateAngryLevel();
+          }
+        });
+      });
+    }
+
+    document.getElementById("checkPuzzle").onclick = () => {
+      if (correctPlacements === 9) {
+        updateAngryLevel(false);
+        showResult(true);
+      } else {
+        updateAngryLevel();
+        showAngry();
+      }
+    };
+
+    // ---------- LEVEL 3: Emoji Puzzles ----------
+    function startLevel3(){
+      level3.classList.remove("hidden");
+      const emojiPuzzles = [
+        {q: "🌹🚉📖", a: ["proposal", "station", "physics", "exam"]},
+        {q: "🍽️😍🎂", a: ["first date", "date"]},
+        {q: "🎡😨🙏", a: ["wonders park", "park", "rides", "om", "namah", "shivay"]},
+        {q: "🏞️🐒🍌🚂", a: ["matheran", "monkeys", "toy", "train"]},
+        {q: "🏖️📸🍔🧣", a: ["beach","dadar", "scarf"]},
+        {q: "🕌🌉🚶‍♀️", a: ["haji ali", "ali", "mahalaxmi", "walk"]},
+        {q: "🐅🌳📷", a: ["borivali", "national park", "park"]},
+        {q: "🐒🥭🐮", a: ["zoo", "iskcon"]},
+        {q: "❄️🛷😂", a: ["snow world", "world", "sled", "sliding"]},
+        {q: "🌧️🏍️⛲", a: ["bike ride", "ride", "rain", "mandir", "waterfall"]},
+        {q: "🌿📸😊", a: ["nature trail", "trail"]},
+        {q: "🎂🎉🎈", a: ["birthday", "surprise"]}
+      ];
+      
+      const container = document.getElementById("quizContainer");
+      container.innerHTML = "";
+      
+      emojiPuzzles.forEach((item, index) => {
+        const quizItem = document.createElement("div");
+        quizItem.className = "quiz-item";
+        quizItem.innerHTML = `
+          <p>${item.q}</p>
+          <input type="text" placeholder="Your answer...">
+          <div class="correct-answer" style="display: none; color: #7c4d4d; font-size: 0.9em; margin-top: 5px;">Possible answers: ${item.a.join(", ")}</div>
+        `;
+        container.appendChild(quizItem);
+      });
+
+      document.getElementById("finishGame").onclick = () => {
+        const inputs = container.querySelectorAll("input");
+        let allCorrect = true;
+        
+        inputs.forEach((input, index) => {
+          const userAnswer = input.value.trim().toLowerCase();
+          const correctAnswers = emojiPuzzles[index].a;
+          
+          // Check if user's answer contains any of the correct keywords
+          const isCorrect = correctAnswers.some(answer => 
+            userAnswer.includes(answer.toLowerCase())
+          );
+          
+          if (!isCorrect) {
+            allCorrect = false;
+            input.style.borderColor = "#ff6b6b";
+            input.nextElementSibling.style.display = "block";
+          } else {
+            input.style.borderColor = "#7cff7c";
+            input.nextElementSibling.style.display = "none";
+          }
+        });
+        
+        if (allCorrect) {
+          updateAngryLevel(false);
+          showResult(true);
+        } else {
+          updateAngryLevel();
+          showAngry();
+        }
+      };
+    }
+
+    // ---------- Result / Angry ----------
+    function showAngry(){
+      result.classList.remove("hidden");
+      document.getElementById("resultMsg").innerHTML = "😡 Angry Bird is getting angrier after seeing this!\n\nAngry Level: " + angryCount;
+      level1.classList.add("hidden"); 
+      level2.classList.add("hidden"); 
+      level3.classList.add("hidden");
+    }
+
+    function showResult(win){
+      result.classList.remove("hidden");
+      
+      if (win) {
+        document.getElementById("resultMsg").innerHTML = 
+          "🎉 Yay! You completed this challenge! 💕\n\n" +
+          "Impressed 😉! \n\n" +
+          "I love you more than anything! 💖";
+      } else {
+        document.getElementById("resultMsg").innerHTML = 
+          "😡 Angry Bird is getting angrier after seeing this!\n\n" +
+          "Angry Level: " + angryCount;
+      }
+      
+      level1.classList.add("hidden"); 
+      level2.classList.add("hidden"); 
+      level3.classList.add("hidden");
+    }
+
+    // Initialize floating hearts
+    function initHearts() {
+      const heartsContainer = document.querySelector('.floating-hearts');
+      for (let i = 0; i < 5; i++) {
+        const heart = document.createElement('span');
+        heart.innerHTML = '💖';
+        heart.style.left = `${Math.random() * 100}%`;
+        heart.style.animationDelay = `${Math.random() * 5}s`;
+        heartsContainer.appendChild(heart);
+      }
+    }
+
+    // Initialize when page loads
+    window.onload = function() {
+      initHearts();
+    };
+  </script>
+</body>
+</html>
