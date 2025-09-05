@@ -9,11 +9,6 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      user-select: none;
-      touch-action: manipulation;
     }
 
     body {
@@ -225,13 +220,14 @@
       font-size: 1.1em;
       transition: all 0.2s;
       box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      /* Add touch-action to prevent default browser gestures */
       touch-action: none;
     }
     
-    .draggable-list li.dragging {
+    .draggable-list li:active {
+      cursor: grabbing;
       transform: scale(1.02);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-      opacity: 0.8;
     }
 
     /* Puzzle Board */
@@ -240,11 +236,14 @@
       flex-direction: column;
       align-items: center;
       margin: 20px 0;
+      width: 100%;
     }
 
     #puzzleBoard {
-      width: 300px;
-      height: 300px;
+      width: 95%; /* Make the board more responsive */
+      max-width: 320px;
+      height: auto; /* Let height adjust */
+      aspect-ratio: 1 / 1; /* Maintain aspect ratio */
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 4px;
@@ -253,12 +252,12 @@
       overflow: hidden;
       background: #ff9a9e;
       margin-bottom: 20px;
-      touch-action: none;
     }
 
     .puzzle-cell {
       width: 100%;
-      height: 97px;
+      height: auto;
+      aspect-ratio: 1 / 1; /* Maintain aspect ratio */
       background-color: rgba(255, 255, 255, 0.5);
       border-radius: 5px;
       display: flex;
@@ -266,6 +265,8 @@
       justify-content: center;
       font-size: 24px;
       color: #d1477a;
+      /* Add touch-action to prevent default browser gestures */
+      touch-action: none;
     }
 
     .puzzle-cell.correct {
@@ -276,19 +277,21 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 4px;
-      width: 300px;
+      width: 95%; /* Make the pieces container more responsive */
+      max-width: 320px;
       margin-top: 20px;
-      touch-action: none;
     }
 
     .puzzle-piece {
-      width: 96px;
-      height: 96px;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1; /* Maintain aspect ratio */
       background-size: 300px 300px;
       cursor: grab;
       transition: transform 0.2s;
       border-radius: 5px;
       border: 2px solid #ff9a9e;
+      /* Add touch-action to prevent default browser gestures */
       touch-action: none;
     }
 
@@ -409,54 +412,6 @@
       background: linear-gradient(to right, #ff8e8e, #ff6b6b);
       transform: translateY(-2px);
     }
-
-    /* Mobile-specific styles */
-    @media (max-width: 600px) {
-      .screen {
-        padding: 20px 15px;
-        margin: 15px;
-        max-height: 90vh;
-      }
-      
-      h1 {
-        font-size: 1.8rem;
-      }
-      
-      h2 {
-        font-size: 1.4rem;
-      }
-      
-      p {
-        font-size: 1rem;
-      }
-      
-      button {
-        padding: 12px 20px;
-        font-size: 1rem;
-      }
-      
-      #puzzleBoard, #puzzlePieces {
-        width: 270px;
-        height: 270px;
-      }
-      
-      .puzzle-cell, .puzzle-piece {
-        width: 86px;
-        height: 86px;
-      }
-      
-      .draggable-list li {
-        padding: 12px;
-        font-size: 1rem;
-      }
-      
-      #angryLevel {
-        top: 10px;
-        right: 10px;
-        padding: 8px 12px;
-        font-size: 0.9rem;
-      }
-    }
   </style>
 </head>
 <body>
@@ -552,7 +507,7 @@
   <!-- Result -->
   <div id="result" class="screen hidden">
     <h1 id="resultMsg"></h1>
-    <button onclick="location.reload()">Play Again 🔁</button>
+    <button onclick="resetGameAndPlayAgain()">Play Again 🔁</button>
   </div>
 
   <script>
@@ -561,7 +516,7 @@
     let selectedImage = null;
     let puzzlePieces = [];
     let correctPlacements = 0;
-    let touchStartY, touchStartX, draggedElement = null;
+    let currentDragTarget = null; // For touch events
 
     // ---------- Screens ----------
     const welcome = document.getElementById("welcome");
@@ -621,97 +576,6 @@
       }
     }
 
-    // ---------- Touch/Drag Functions ----------
-    function handleTouchStart(e) {
-      touchStartY = e.touches[0].clientY;
-      touchStartX = e.touches[0].clientX;
-      draggedElement = this;
-      this.classList.add('dragging');
-      e.preventDefault();
-    }
-
-    function handleTouchMove(e) {
-      if (!draggedElement) return;
-      
-      const touchY = e.touches[0].clientY;
-      const touchX = e.touches[0].clientX;
-      
-      const offsetY = touchY - touchStartY;
-      const offsetX = touchX - touchStartX;
-      
-      draggedElement.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-      e.preventDefault();
-    }
-
-    function handleTouchEnd(e) {
-      if (!draggedElement) return;
-      
-      draggedElement.classList.remove('dragging');
-      draggedElement.style.transform = '';
-      
-      // Find the element we're dropping on
-      const touch = e.changedTouches[0];
-      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-      
-      if (elementBelow && elementBelow !== draggedElement) {
-        // Handle drop logic for different games
-        if (draggedElement.classList.contains('puzzle-piece')) {
-          handlePuzzleDrop(draggedElement, elementBelow);
-        } else if (draggedElement.parentElement.id === 'memoryList') {
-          handleMemoryDrop(draggedElement, elementBelow);
-        }
-      }
-      
-      draggedElement = null;
-      e.preventDefault();
-    }
-
-    function handleMemoryDrop(draggedItem, targetElement) {
-      const list = document.getElementById("memoryList");
-      let targetItem = targetElement;
-      
-      // Find the list item if we dropped on text or other child elements
-      while (targetItem && targetItem.nodeName !== 'LI' && targetItem.parentElement) {
-        targetItem = targetItem.parentElement;
-      }
-      
-      if (targetItem && targetItem.nodeName === 'LI' && targetItem !== draggedItem) {
-        list.insertBefore(draggedItem, targetItem.nextSibling);
-      }
-    }
-
-    function handlePuzzleDrop(piece, targetCell) {
-      if (targetCell.classList.contains('puzzle-cell')) {
-        const correctPosition = parseInt(piece.dataset.correctPosition);
-        const cellIndex = parseInt(targetCell.dataset.index);
-        
-        if (correctPosition === cellIndex) {
-          // Correct placement
-          targetCell.style.backgroundImage = piece.style.backgroundImage;
-          targetCell.style.backgroundSize = "300px 300px";
-          targetCell.style.backgroundPosition = piece.style.backgroundPosition;
-          targetCell.classList.add('correct');
-          
-          piece.classList.add('placed');
-          piece.style.opacity = '0.3';
-          piece.style.cursor = 'default';
-          
-          correctPlacements++;
-          
-          if (correctPlacements === 9) {
-            // Puzzle completed
-            setTimeout(() => {
-              updateAngryLevel(false);
-              showResult(true);
-            }, 500);
-          }
-        } else {
-          // Wrong placement
-          updateAngryLevel();
-        }
-      }
-    }
-
     // ---------- LEVEL 1: Memory Drag ----------
     const memories = [
       "Proposal 💍",
@@ -742,12 +606,6 @@
         const li = document.createElement("li");
         li.textContent = mem;
         li.draggable = true;
-        
-        // Add touch events for mobile
-        li.addEventListener('touchstart', handleTouchStart, { passive: false });
-        li.addEventListener('touchmove', handleTouchMove, { passive: false });
-        li.addEventListener('touchend', handleTouchEnd, { passive: false });
-        
         list.appendChild(li);
       });
       
@@ -759,7 +617,7 @@
           updateAngryLevel(false);
           showResult(true);
         } else {
-          updateAngryLevel();
+          updateAngryLevel(true); // Increase angry level on failure
           showAngry();
         }
       }
@@ -769,6 +627,7 @@
       let draggedItem = null;
 
       container.querySelectorAll('li').forEach(item => {
+        // Mouse events
         item.addEventListener('dragstart', function() {
           draggedItem = this;
           setTimeout(() => this.style.opacity = '0.5', 0);
@@ -798,6 +657,46 @@
           if (this !== draggedItem) {
             container.insertBefore(draggedItem, this.nextSibling);
           }
+        });
+        
+        // Touch events
+        item.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          draggedItem = this;
+          this.style.opacity = '0.5';
+          this.style.transform = 'scale(1.05)';
+        });
+        
+        item.addEventListener('touchmove', function(e) {
+          e.preventDefault();
+          const touch = e.touches[0];
+          const target = document.elementFromPoint(touch.clientX, touch.clientY);
+          
+          if (target && target.tagName === 'LI' && target.parentElement === container) {
+            if (currentDragTarget && currentDragTarget !== target) {
+              currentDragTarget.style.backgroundColor = '#ffe4e1';
+            }
+            currentDragTarget = target;
+            currentDragTarget.style.backgroundColor = '#ffd1dc';
+          } else {
+            if (currentDragTarget) {
+              currentDragTarget.style.backgroundColor = '#ffe4e1';
+              currentDragTarget = null;
+            }
+          }
+        });
+
+        item.addEventListener('touchend', function(e) {
+          if (currentDragTarget && currentDragTarget !== draggedItem) {
+            container.insertBefore(draggedItem, currentDragTarget.nextSibling);
+          }
+          this.style.opacity = '1';
+          this.style.transform = 'none';
+          if (currentDragTarget) {
+            currentDragTarget.style.backgroundColor = '#ffe4e1';
+          }
+          draggedItem = null;
+          currentDragTarget = null;
         });
       });
     }
@@ -842,7 +741,15 @@
 
     function generatePuzzle() {
       const piecesContainer = document.getElementById("puzzlePieces");
+      const board = document.getElementById("puzzleBoard");
       piecesContainer.innerHTML = "";
+      // Reset the board to empty cells with numbers
+      board.querySelectorAll('.puzzle-cell').forEach((cell, i) => {
+        cell.style.backgroundImage = 'none';
+        cell.style.backgroundPosition = '';
+        cell.classList.remove('correct');
+        cell.innerHTML = i + 1;
+      });
       puzzlePieces = [];
       correctPlacements = 0;
       
@@ -856,11 +763,6 @@
         piece.dataset.correctPosition = i;
         piece.draggable = true;
         
-        // Add touch events for mobile
-        piece.addEventListener('touchstart', handleTouchStart, { passive: false });
-        piece.addEventListener('touchmove', handleTouchMove, { passive: false });
-        piece.addEventListener('touchend', handleTouchEnd, { passive: false });
-        
         puzzlePieces.push(piece);
         piecesContainer.appendChild(piece);
       }
@@ -872,27 +774,116 @@
 
     function shufflePuzzlePieces() {
       const piecesContainer = document.getElementById("puzzlePieces");
-      for (let i = piecesContainer.children.length; i >= 0; i--) {
-        piecesContainer.appendChild(piecesContainer.children[Math.random() * i | 0]);
-      }
+      const pieces = Array.from(piecesContainer.children);
+      pieces.sort(() => Math.random() - 0.5);
+      pieces.forEach(piece => piecesContainer.appendChild(piece));
     }
 
     function initPuzzleDragAndDrop() {
       const cells = document.querySelectorAll('.puzzle-cell');
       const pieces = document.querySelectorAll('.puzzle-piece');
       
+      let draggedPiece = null;
+      let currentDropTarget = null;
+      let touchOffsetX = 0;
+      let touchOffsetY = 0;
+
       pieces.forEach(piece => {
+        // Mouse events
         piece.addEventListener('dragstart', function(e) {
           e.dataTransfer.setData('text/plain', this.dataset.correctPosition);
           this.classList.add('dragging');
+          draggedPiece = this;
         });
         
         piece.addEventListener('dragend', function() {
           this.classList.remove('dragging');
+          draggedPiece = null;
+        });
+        
+        // Touch events
+        piece.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          const touch = e.touches[0];
+          draggedPiece = this;
+          this.classList.add('dragging');
+          // Calculate offset for accurate positioning
+          const rect = this.getBoundingClientRect();
+          touchOffsetX = touch.clientX - rect.left;
+          touchOffsetY = touch.clientY - rect.top;
+          
+          this.style.position = 'fixed';
+          this.style.zIndex = '1000';
+          this.style.left = `${touch.clientX - touchOffsetX}px`;
+          this.style.top = `${touch.clientY - touchOffsetY}px`;
+        });
+        
+        piece.addEventListener('touchmove', function(e) {
+          e.preventDefault();
+          const touch = e.touches[0];
+          this.style.left = `${touch.clientX - touchOffsetX}px`;
+          this.style.top = `${touch.clientY - touchOffsetY}px`;
+          
+          const target = document.elementFromPoint(touch.clientX, touch.clientY);
+          if (target && target.classList.contains('puzzle-cell')) {
+            if (currentDropTarget && currentDropTarget !== target) {
+              currentDropTarget.style.backgroundColor = "";
+            }
+            currentDropTarget = target;
+            currentDropTarget.style.backgroundColor = "#ffd6e0";
+          } else {
+            if (currentDropTarget) {
+              currentDropTarget.style.backgroundColor = "";
+              currentDropTarget = null;
+            }
+          }
+        });
+        
+        piece.addEventListener('touchend', function() {
+          if (currentDropTarget) {
+            const correctPosition = draggedPiece.dataset.correctPosition;
+            const cellIndex = parseInt(currentDropTarget.dataset.index);
+            
+            if (parseInt(correctPosition) === cellIndex) {
+              // Correct placement
+              currentDropTarget.style.backgroundImage = draggedPiece.style.backgroundImage;
+              currentDropTarget.style.backgroundSize = "300px 300px";
+              currentDropTarget.style.backgroundPosition = draggedPiece.style.backgroundPosition;
+              currentDropTarget.classList.add('correct');
+              currentDropTarget.innerHTML = ''; // Hide the number
+              
+              draggedPiece.classList.add('placed');
+              draggedPiece.style.opacity = '0.3';
+              draggedPiece.style.cursor = 'default';
+              
+              correctPlacements++;
+              
+              if (correctPlacements === 9) {
+                setTimeout(() => {
+                  updateAngryLevel(false);
+                  showResult(true);
+                }, 500);
+              }
+            } else {
+              // Wrong placement
+              updateAngryLevel(true); // Increase angry level on failure
+            }
+            currentDropTarget.style.backgroundColor = "";
+          }
+          
+          // Reset piece position and classes
+          draggedPiece.classList.remove('dragging');
+          draggedPiece.style.position = '';
+          draggedPiece.style.left = '';
+          draggedPiece.style.top = '';
+          draggedPiece.style.zIndex = '';
+          draggedPiece = null;
+          currentDropTarget = null;
         });
       });
       
       cells.forEach(cell => {
+        // Mouse events
         cell.addEventListener('dragover', function(e) {
           e.preventDefault();
         });
@@ -920,6 +911,7 @@
             this.style.backgroundSize = "300px 300px";
             this.style.backgroundPosition = draggingPiece.style.backgroundPosition;
             this.classList.add('correct');
+            this.innerHTML = '';
             
             draggingPiece.classList.add('placed');
             draggingPiece.style.opacity = '0.3';
@@ -936,7 +928,7 @@
             }
           } else {
             // Wrong placement
-            updateAngryLevel();
+            updateAngryLevel(true); // Increase angry level on failure
           }
         });
       });
@@ -947,7 +939,7 @@
         updateAngryLevel(false);
         showResult(true);
       } else {
-        updateAngryLevel();
+        updateAngryLevel(true); // Increase angry level on failure
         showAngry();
       }
     };
@@ -956,8 +948,8 @@
     function startLevel3(){
       level3.classList.remove("hidden");
       const emojiPuzzles = [
-        {q: "🌹🚉📖", a: ["proposal", "station", "physics", "exam"]},
-        {q: "🍽️😍🎂", a: ["first date", "date"]},
+        {q: "🌹🚉📖", a: ["proposal","propose", "station", "physics", "exam"]},
+        {q: "🍽️💋1️⃣", a: ["first date", "date"]},
         {q: "🎡😨🙏", a: ["wonders park", "park", "rides", "om", "namah", "shivay"]},
         {q: "🏞️🐒🍌🚂", a: ["matheran", "monkeys", "toy", "train"]},
         {q: "🏖️📸🍔🧣", a: ["beach","dadar", "scarf"]},
@@ -1011,7 +1003,7 @@
           updateAngryLevel(false);
           showResult(true);
         } else {
-          updateAngryLevel();
+          updateAngryLevel(true); // Increase angry level on failure
           showAngry();
         }
       };
@@ -1045,13 +1037,27 @@
       level3.classList.add("hidden");
     }
 
-    // Initialize the game
-    window.onload = function() {
-      // Add some floating hearts animation
-      const hearts = document.querySelectorAll('.floating-hearts span');
-      hearts.forEach(heart => {
+    // New function to reset the game state without reloading the page
+    function resetGameAndPlayAgain() {
+        result.classList.add("hidden");
+        gameSelect.classList.remove("hidden");
+    }
+
+    // Initialize floating hearts
+    function initHearts() {
+      const heartsContainer = document.querySelector('.floating-hearts');
+      for (let i = 0; i < 5; i++) {
+        const heart = document.createElement('span');
+        heart.innerHTML = '💖';
+        heart.style.left = `${Math.random() * 100}%`;
         heart.style.animationDelay = `${Math.random() * 5}s`;
-      });
+        heartsContainer.appendChild(heart);
+      }
+    }
+
+    // Initialize when page loads
+    window.onload = function() {
+      initHearts();
     };
   </script>
 </body>
